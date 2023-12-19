@@ -1,0 +1,42 @@
+Documentation : 
+
+Name: Mohammad Aman Zargar 
+NSID: MAZ423.
+
+Q1:
+
+Design: Our job in this assignment was to calculate the turnaround time and Runtime of program executions.
+for this purpose we had to keep track of the time in ticks when a proccess was created . and 
+ended . To accomplish this task we had to add three fields p->created , p->ended, p->Running .
+the p-> created field would capture the ticks when a proccess is created . similarly p->ended captures ticks when a proccess is 
+done executing. p-running would be incremented when ticks is increment . after setting up these fields and making changes in the program to make these fields functional . 
+our next job was to fork 45 chlidren (ie have 46 processes in total including the parent ) and make 3 groups that would do three different calculations . we would then calculate the sum of turnaround times and runtimes of each group of 15 procceses. and print them on the console.
+
+
+
+implementation:
+ To accomplish our design goals we made the following changes :
+ created three fields in proc.h . p->created, p->ended, p->running. //these are private to each proccess so locks must be   implemented.
+ the p->created field was set by capturing ticks, when a proccess is allocated in allocproc(). in proc.c
+ the p->ended field was set by capturing ticks , when a proccess exits making a call to exit().
+ the p-> running field is incremented in the scheduler , since we know scheduler has an infinite loop . if the next loop
+ has the same proccess running , we increment p->running by 1.
+ 
+ To obtain these values in the userspace we had to used a modified version of wait() , we created a waitstat() function in proc.c that used copyout to get the turnaround time and runtime of each proccess from Kernel space to userspace.
+ 
+ test.c:
+ our test program takes in 4 values KLMN. used to do a summation calculation mentioned in the Assignment discription.
+ test.c has a for loop that forks 45 child proccesses and waits for them to finish . 
+ we change the value of N for 15-30 procceses to use L value .
+ and change the value of N for 30-45 procceses to use M value .
+ 
+ using conditional branching we sum up values of each group of 15 procceses and print them out on the Console.
+
+
+
+limitations:
+upon running test.c we got expexted runtimes and turnaround times . it was expected that proccesses that had more calculations 
+to do would have higher turnaround times and that is what we are getting in our test program , also proccess with higher upper bound
+for summation also had higher runtime values as expected . 
+the only limitation that could be there in our program could be wrong segregation of the three groups . that is a possiblity considering the complexity of so many procceses . rest our turnaround and runtimes seemed to make sense .
+although one thing was noticed for small proccesses when we get a turnaroundtime of 0 . we got a runtime of one , if a proccess had a turnaround time as 0 that means it was created and ended in the same tick . if that is the case , our suntime must be 0 as well . but turns out for some proccesses it is 1 . this is due to the fact that we are incrementing running field in the scheduler loop . and once it runs it is incremented . therefore the min value it attains is 1 and never 0 .

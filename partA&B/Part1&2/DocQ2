@@ -1,0 +1,83 @@
+Q2. Documentation 
+
+Name: Mohammad Aman Zargar 
+NSID: MAZ423.
+
+Design: 
+our goal in this part of the question was to implement a variant of MLFQ scheduler . in which each proccess has a priority associated with it , initially a proccess with the highest priority runs , if no proccess has high priority then a meduim priority proccess is run , after a meduim priority proccess is run , the scheduler checks again for a high priority proccess . only if there are no high or meduim prority proccess , a low priority proccess is run. initially a proccess has high priority . after a high priority proccess runs . its priority is set to meduim . after a meduim priority proccess is run m (more time ). its priority is set to low . after every moveup times a sceduling decesion is made . (ie a descision is made to run a proccess) . the priority of all proccesses is set to high.
+
+
+implementation:
+This task was accomplished by making changes in the following files. param.h,proc.c,proc.h.
+in param.h we added MOVEUP , MTIMES, to track how many times a scheduler decision is made and how many times a meduim priority proccess runs. 
+the scheduler policy was then changes by the use of simple conditional statements . and two boolens foundHigh , foundMeduim, these two variables tracked if a proccess of that priority was run or not . this prevented multiple decesions to be made in one loop iteration of the scheduler. our scheduler basically looped through all proccesses to see if a high runnable proccess existed , if it did , we ran it and changed its priority to meduim. if a high prority proccess was run . foundHigh ==1 , our program would not look for a Meduim priority proccess , skip the loop for Meduim and low priority proccesses. One thing to note here is that after running a high priority proccess , we searched for proccesses from the very start again . this was done to make the branching less complicated , and with hardly any performance cost . because if we resumed our searched we anyways had to check items that we behind the proccess that was currently running/ just finished  .we are only checking one extra proccess . that is the proccess that just finished running if we check the list from the very start .
+
+The following changes were made in 
+Param.h:
+created MOVEUP and MTIMES.
+Proc.h: 
+added a decesion variable to CPU structure.     -  to track number of scheduling decesions made
+added added a priority field for proc structure -  to associate priority to proccesses
+added medrun feild to proc structure .          -  to track how many times a meduim priority proccess has run.
+Proc.c:
+changed scheduler function to implement a variant of MLFQ.
+
+
+Execution/results: the end goal of this part was to check if using a new scheduling policy would have any impact on the turnaround times of the three groups of proccesses we made in part 1 . and after running the new scheduler . there was a noticable difference in the turnaround times of proccesses . especially in long proccesses the new scheduler seemed to perform significantly better . one challenge although was to set the values of MOVEUP and MTIMES . setting a high value of MOVEUP seemed to starve the low priority proccess and the interval of priority boost was really long and the procceses that  had a low priority would starve . 
+OLD SCHEDULER:
+$ test 1000 10000 100 50000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  75 Runtime:  34 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  75 Runtime:  15 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  87 Runtime:  17 
+
+$ test 10000 10000 10000 10000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  364 Runtime:  53 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  447 Runtime:  49 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  511 Runtime:  51 
+
+
+NEW SCHEDULER: MOVEUP:5   MTIMES:100
+$ test 10000 10000 10000 10000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  341 Runtime:  52 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  428 Runtime:  51 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  498 Runtime:  50 
+
+
+
+NEW SCHEDULER: MOVEUP:5   MTIMES:5
+
+$ test 1000 10000 100 50000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  67 Runtime:  34 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  75 Runtime:  15 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  84 Runtime:  17 
+
+$ test 10000 10000 10000 10000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  364 Runtime:  53 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  447 Runtime:  49 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  511 Runtime:  51 
+
+
+NEW SCHEDULER: MOVEUP:100   MTIMES:5
+
+$ test 1000 10000 100 50000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  86 Runtime:  36 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  75 Runtime:  15 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  89 Runtime:  18 
+
+NEW SCHEDULER: MOVEUP:5   MTIMES:100
+
+$ test 1000 10000 100 50000
+Turnaround time ,Runtime of Group 1 using N : Turnaround time:  77 Runtime:  35 
+Turnaround time ,Runtime of Group 2 using M : Turnaround time:  90 Runtime:  15 
+Turnaround time ,Runtime of Group 3 using L : Turnaround time:  100 Runtime:  18 
+
+
+
+Discussion: As we see in the test examples the turnaround times improve while using the new scheduler . especially for longer proccesses . when MOVEUP time is low . this is because of the fact that longer running procceses get a priority boost after MOVEUP times. the smaller the MOVEUP value the better the Longer running jobs perform , however the a small MOVEUP will hurt proccesses that run for a short time slice eg procceses that have I/O. 
+Thus there has to be a sweet spot for the two valuses MOVEUP and MTIMES to get a decent turn around time for both long and I/O proccesses.
+
+
+limitations:
+for this scheduler to be efficient we need a sweet spot for the values of MOVEUP and MTIMES , which can be challenging . 
+also in realworld scheduler instead of saving priorities in each structure , the use of priority Queues is more practical .
+
